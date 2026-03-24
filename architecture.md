@@ -18,8 +18,9 @@ MeetingPro AI is an intelligent meeting analysis platform that transforms meetin
 - **Google Fonts (Inter)** - Typography
 
 ### External Services
-- **GROQ API** - AI-powered natural language processing for meeting analysis
+- **Configurable AI APIs** - Support for OpenAI, Google Gemini, and Groq
 - **Fallback**: Rule-based analysis when AI is unavailable
+- **API Key Management**: Secure client-side storage with provider selection
 
 ---
 
@@ -73,10 +74,13 @@ MeetingPro AI is an intelligent meeting analysis platform that transforms meetin
 
 **Analysis Engine**
 - `analyzeMeetingNotes()` - Main entry point for analysis
-- `analyzeWithAI(notes)` - AI-powered analysis using GROQ
+- `analyzeWithAI(notes)` - AI-powered analysis using configurable APIs
+- `getApiKey()` - Returns current provider type and key
+- `getApiUrl()` - Returns correct URL for selected provider
+- `getApiModel()` - Returns correct model for selected provider
 - `processMeetingNotes(notes)` - Rule-based fallback analysis
-- `extractUserStories(notes)` - Pattern matching for story extraction
-- `generateTestCases(stories)` - Test case generation
+- `extractUserStories(notes)` - Pattern matching for story extraction with title simplification
+- `generateTestCases(stories)` - Test case generation with user story labels
 - `generateTechnicalBlueprint(stories, notes)` - Architecture generation
 
 **Display Functions**
@@ -92,6 +96,12 @@ MeetingPro AI is an intelligent meeting analysis platform that transforms meetin
 - `showLoading()` - Displays loading states
 - `showAnalyzingProgress()` - Shows analysis progress feedback
 - `resetButtonProgress()` - Restores button state after analysis
+- `toggleStoryCard(idx)` - Toggle individual user story collapse/expand
+- `toggleStoryTC(storyId)` - Toggle test case group collapse/expand
+- `collapseAllStories()` - Collapse all user stories
+- `expandAllStories()` - Expand all user stories
+- `collapseAllTestCases()` - Collapse all test case groups
+- `expandAllTestCases()` - Expand all test case groups
 
 **Integration**
 - `exportToJira()` - JIRA issue format export
@@ -133,14 +143,18 @@ MeetingPro AI is an intelligent meeting analysis platform that transforms meetin
 #### Results Display
 - **User Stories Cards**:
   - Story ID, priority, epic tags
-  - Title, description, acceptance criteria
+  - Simplified, concise titles (50 char max)
+  - Description, acceptance criteria
   - Metrics (effort, risk, complexity, quality score)
   - Dependencies, assumptions, risks
+  - Individual and global collapse/expand controls
 
 - **Test Cases Grid**:
-  - Linked to user stories
-  - Priority levels
-  - Test types (functional, edge case, integration)
+  - Linked to user stories with blue labels
+  - Priority levels (P1, P2, P3)
+  - Test types (functional, negative, edge case)
+  - Grouped by user story with collapse/expand headers
+  - Global collapse/expand controls
 
 - **Technical Blueprint**:
   - System components
@@ -243,13 +257,18 @@ Click "Analyze Notes" button
         ↓
 Show progress toast & loading states
         ↓
-Check AI checkbox status
+Check analysis mode (Rule-based or AI Assistant)
         ↓
     ┌─────────────┬─────────────┐
     │             │             │
  Use AI      Rule-Based    Error
-(GROQ API)   (Fallback)   Handler
+(Configurable)   (Fallback)   Handler
     │             │             │
+    │    ┌─────────────────┐   │
+    │    │ Provider Check  │   │
+    │    │ OpenAI/Gemini   │   │
+    │    │ /Groq Selected  │   │
+    │    └─────────────────┘   │
     └─────────────┴─────────────┘
               ↓
     Process results
@@ -258,8 +277,8 @@ Check AI checkbox status
               ↓
     Call displayResults()
               ↓
-    ├─ displayUserStories()
-    ├─ displayTestCases()
+    ├─ displayUserStories() (simplified titles)
+    ├─ displayTestCases() (with user story labels)
     ├─ displayTechnicalBlueprint()
     └─ displayInsights()
               ↓
@@ -340,8 +359,11 @@ Scroll to top (if needed)
 ## Key Features
 
 ### 1. AI-Powered Analysis
-- **GROQ Integration**: Advanced NLP for understanding context
+- **Configurable API Integration**: Support for OpenAI (GPT-4), Google Gemini (Gemini-Pro), and Groq (Llama-3.3)
+- **Smart Provider Detection**: Automatically uses correct API format and model
+- **Secure Key Management**: Client-side storage with provider selection
 - **Smart Extraction**: Identifies user roles, requirements, benefits
+- **Title Simplification**: Automatic removal of verbose prefixes, 50-char limit
 - **Quality Scoring**: Automated quality assessment (0-100)
 - **Enhancement**: Auto-fills missing fields (acceptance criteria, metrics)
 
