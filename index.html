@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MeetingPro AI - Intelligent Meeting Analysis</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #6366f1;
+            --primary-dark: #4f46e5;
+            --primary-light: #818cf8;
+            --primary-hover: #4f46e5;
+            --secondary-color: #22d3ee;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --dark-bg: #0f172a;
+            --light-bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --border-color: #e2e8f0;
+            --radius-sm: 0.375rem;
+            --radius-md: 0.5rem;
+            --radius-lg: 0.75rem;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; color: var(--text-primary); }
+        .header { background: var(--card-bg); box-shadow: var(--shadow-md); position: sticky; top: 0; z-index: 100; }
+        .header-content { max-width: 1400px; margin: 0 auto; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+        .logo { display: flex; align-items: center; gap: 0.75rem; font-size: 1.5rem; font-weight: 700; color: var(--primary-color); }
+        .logo i { font-size: 2rem; }
+        .main-nav { display: flex; gap: 0.5rem; }
+        .nav-btn { padding: 0.625rem 1.25rem; border: none; background: transparent; color: var(--text-secondary); font-size: 0.9375rem; font-weight: 500; cursor: pointer; border-radius: var(--radius-md); transition: all 0.2s; }
+        .nav-btn:hover { background: var(--light-bg); color: var(--primary-color); }
+        .nav-btn.active { background: var(--primary-color); color: white; }
+        .header-actions { display: flex; gap: 0.75rem; align-items: center; }
+        .icon-btn { width: 2.5rem; height: 2.5rem; border-radius: 50%; border: 1px solid var(--border-color); background: var(--card-bg); color: var(--text-secondary); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; font-size: 1rem; }
+        .icon-btn:hover { background: var(--primary-color); color: white; border-color: var(--primary-color); }
+        .icon-btn.api-key-btn { background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); color: white; border: none; }
+        .icon-btn.api-key-btn:hover { transform: scale(1.05); }
+        .main-container { max-width: 1400px; margin: 2rem auto; padding: 0 2rem; }
+        .content-section { display: none; }
+        .content-section.active { display: block; }
+        .analyze-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem; }
+        @media (max-width: 1024px) { .analyze-grid { grid-template-columns: 1fr; } }
+        .card { background: var(--card-bg); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); overflow: hidden; }
+        .card-header { padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); }
+        .card-title { font-size: 1.125rem; font-weight: 600; color: var(--text-primary); display: flex; align-items: center; gap: 0.5rem; }
+        .card-actions { display: flex; gap: 0.5rem; }
+        .quick-action-btn { padding: 0.5rem 1rem; border: 1px solid var(--border-color); background: white; color: var(--text-secondary); font-size: 0.875rem; font-weight: 500; cursor: pointer; border-radius: var(--radius-md); transition: all 0.2s; display: flex; align-items: center; gap: 0.375rem; }
+        .quick-action-btn:hover { background: var(--primary-color); color: white; border-color: var(--primary-color); transform: translateY(-2px); box-shadow: var(--shadow-md); }
+        .card-body { padding: 1.5rem; }
+        .form-group { margin-bottom: 1.5rem; }
+        .form-label { display: block; margin-bottom: 0.5rem; font-weight: 500; color: var(--text-primary); font-size: 0.875rem; }
+        .form-select { width: 100%; padding: 0.75rem 1rem; border: 1px solid var(--border-color); border-radius: var(--radius-md); font-size: 0.9375rem; background: white; cursor: pointer; transition: all 0.2s; }
+        .form-select:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1); }
+        .editor-container { border: 1px solid var(--border-color); border-radius: var(--radius-md); overflow: hidden; }
+        .editor-toolbar { padding: 0.75rem 1rem; background: #f8fafc; border-bottom: 1px solid var(--border-color); display: flex; gap: 0.5rem; flex-wrap: wrap; }
+        .toolbar-btn { width: 2rem; height: 2rem; border: 1px solid var(--border-color); background: white; color: var(--text-secondary); cursor: pointer; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+        .toolbar-btn:hover { background: var(--primary-color); color: white; border-color: var(--primary-color); }
+        .editor-textarea { width: 100%; min-height: 400px; padding: 1rem; border: none; resize: vertical; font-family: 'Inter', sans-serif; font-size: 0.9375rem; line-height: 1.6; }
+        .editor-textarea:focus { outline: none; }
+        .word-counter { padding: 0.75rem 1rem; background: #f8fafc; border-top: 1px solid var(--border-color); text-align: right; font-size: 0.875rem; color: var(--text-secondary); }
+        .btn-primary { width: 100%; padding: 1rem 2rem; background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%); color: white; border: none; border-radius: var(--radius-md); font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; justify-content: center; gap: 0.75rem; margin-top: 1rem; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: var(--shadow-xl); }
+        .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+        .btn-primary.loading { position: relative; color: transparent; }
+        .btn-primary.loading::after { content: ''; position: absolute; width: 1.25rem; height: 1.25rem; border: 2px solid white; border-top-color: transparent; border-radius: 50%; animation: spin 0.8s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .results-panel { min-height: 600px; }
+        .tabs-header { display: flex; border-bottom: 2px solid var(--border-color); background: #f8fafc; }
+        .tab-btn { padding: 1rem 1.5rem; border: none; background: transparent; color: var(--text-secondary); font-size: 0.9375rem; font-weight: 500; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.2s; position: relative; bottom: -2px; }
+        .tab-btn:hover { color: var(--primary-color); }
+        .tab-btn.active { color: var(--primary-color); border-bottom-color: var(--primary-color); background: white; }
+        .tab-content { padding: 1.5rem; display: none; }
+        .tab-content.active { display: block; }
+        .stories-grid { display: grid; gap: 1.5rem; }
+        .story-card { background: white; border: 2px solid var(--border-color); border-radius: var(--radius-lg); padding: 1.5rem; transition: all 0.3s; position: relative; }
+        .story-card:hover { box-shadow: var(--shadow-xl); transform: translateY(-2px); }
+        .story-card.priority-high { border-left: 4px solid var(--danger-color); }
+        .story-card.priority-medium { border-left: 4px solid var(--warning-color); }
+        .story-card.priority-low { border-left: 4px solid var(--success-color); }
+        .story-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; }
+        .story-header-actions { display: flex; align-items: center; gap: 0.75rem; }
+        .story-collapse-btn { background: var(--primary-color); border: none; color: white; cursor: pointer; padding: 0.5rem; font-size: 0.875rem; transition: color 0.2s, background 0.2s; z-index: 10; position: relative; border-radius: 4px; min-width: 30px; min-height: 30px; display: flex; align-items: center; justify-content: center; }
+        .story-collapse-btn:hover { background: var(--primary-hover); transform: scale(1.1); }
+        .story-content { transition: all 0.3s ease; }
+        .story-content.collapsed { display: none; }
+        .story-id { font-size: 0.75rem; font-weight: 600; color: var(--text-secondary); background: var(--light-bg); padding: 0.25rem 0.75rem; border-radius: var(--radius-sm); }
+        .story-tags { display: flex; gap: 0.5rem; }
+        .tag { padding: 0.25rem 0.75rem; border-radius: var(--radius-sm); font-size: 0.75rem; font-weight: 500; }
+        .tag-epic { background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%); color: var(--primary-color); }
+        .tag-priority { background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%); color: var(--danger-color); }
+        .story-title { font-size: 1.125rem; font-weight: 600; color: var(--text-primary); margin-bottom: 0.75rem; }
+        .story-description { color: var(--text-secondary); line-height: 1.6; margin-bottom: 1rem; }
+        .story-meta { display: flex; gap: 1.5rem; flex-wrap: wrap; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border-color); }
+        .meta-item { display: flex; align-items: center; gap: 0.375rem; font-size: 0.875rem; color: var(--text-secondary); }
+        .meta-item i { color: var(--primary-color); }
+        .feature-tree-container { max-height: 700px; overflow-y: auto; }
+        .tree-controls { display: flex; gap: 0.75rem; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border-color); }
+        .tree-node { margin-bottom: 1rem; }
+        .epic-node { background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border: 2px solid var(--border-color); border-radius: var(--radius-lg); overflow: hidden; }
+        .epic-node:nth-child(even) { background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%); }
+        .epic-header { padding: 1rem 1.25rem; cursor: pointer; display: flex; justify-content: space-between; align-items: center; user-select: none; transition: all 0.2s; }
+        .epic-header:hover { background: rgba(99, 102, 241, 0.05); }
+        .epic-title { display: flex; align-items: center; gap: 0.75rem; font-weight: 600; font-size: 1.0625rem; color: var(--text-primary); }
+        .epic-icon { width: 2rem; height: 2rem; background: var(--primary-color); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        .epic-stats { display: flex; gap: 1rem; align-items: center; }
+        .stat-badge { padding: 0.25rem 0.75rem; background: white; border-radius: var(--radius-sm); font-size: 0.8125rem; font-weight: 500; color: var(--text-secondary); }
+        .expand-icon { transition: transform 0.3s; }
+        .expand-icon.collapsed { transform: rotate(-90deg); }
+        .epic-content { padding: 0 1.25rem 1.25rem; }
+        .epic-content.collapsed { display: none; }
+        .story-list { display: grid; gap: 0.75rem; }
+        .story-node { background: white; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1rem; transition: all 0.2s; }
+        .story-node:hover { box-shadow: var(--shadow-md); border-color: var(--primary-light); }
+        .story-node-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; }
+        .story-node-title { font-weight: 500; color: var(--text-primary); }
+        .priority-indicator { width: 0.75rem; height: 0.75rem; border-radius: 50%; }
+        .priority-indicator.high { background: var(--danger-color); }
+        .priority-indicator.medium { background: var(--warning-color); }
+        .priority-indicator.low { background: var(--success-color); }
+        .test-cases-table { width: 100%; border-collapse: collapse; }
+        .test-cases-table th { background: #f8fafc; padding: 1rem; text-align: left; font-weight: 600; font-size: 0.875rem; color: var(--text-secondary); border-bottom: 2px solid var(--border-color); }
+        .test-cases-table td { padding: 1rem; border-bottom: 1px solid var(--border-color); font-size: 0.9375rem; }
+        .test-cases-table tr:hover { background: #f8fafc; }
+        .insights-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; }
+        .insight-card { background: white; border: 2px solid var(--border-color); border-radius: var(--radius-lg); padding: 1.5rem; }
+        .insight-card.success { border-color: var(--success-color); }
+        .insight-card.warning { border-color: var(--warning-color); }
+        .insight-card.danger { border-color: var(--danger-color); }
+        .insight-header { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem; }
+        .insight-icon { width: 2.5rem; height: 2.5rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        .insight-icon.success { background: rgba(16, 185, 129, 0.1); color: var(--success-color); }
+        .insight-icon.warning { background: rgba(245, 158, 11, 0.1); color: var(--warning-color); }
+        .insight-icon.danger { background: rgba(239, 68, 68, 0.1); color: var(--danger-color); }
+        .insight-title { font-weight: 600; font-size: 1.0625rem; }
+        .insight-content { color: var(--text-secondary); line-height: 1.6; }
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.5); display: none; align-items: center; justify-content: center; z-index: 1000; }
+        .modal-overlay.active { display: flex; }
+        .modal { background: white; border-radius: var(--radius-lg); max-width: 500px; width: 90%; max-height: 90vh; overflow-y: auto; box-shadow: var(--shadow-xl); }
+        .modal-header { padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
+        .modal-title { font-size: 1.125rem; font-weight: 600; }
+        .modal-close { width: 2rem; height: 2rem; border: none; background: transparent; cursor: pointer; color: var(--text-secondary); font-size: 1.25rem; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-sm); }
+        .modal-close:hover { background: var(--light-bg); }
+        .modal-body { padding: 1.5rem; }
+        .modal-footer { padding: 1rem 1.5rem; border-top: 1px solid var(--border-color); display: flex; justify-content: flex-end; gap: 0.75rem; }
+        .btn-secondary { padding: 0.625rem 1.25rem; border: 1px solid var(--border-color); background: white; color: var(--text-secondary); font-size: 0.9375rem; font-weight: 500; cursor: pointer; border-radius: var(--radius-md); transition: all 0.2s; }
+        .btn-secondary:hover { background: var(--light-bg); }
+        .toast-container { position: fixed; bottom: 2rem; right: 2rem; z-index: 1001; display: flex; flex-direction: column; gap: 0.75rem; }
+        .toast { background: white; border-radius: var(--radius-md); box-shadow: var(--shadow-xl); padding: 1rem 1.25rem; display: flex; align-items: center; gap: 0.75rem; min-width: 300px; animation: slideIn 0.3s ease-out; }
+        @keyframes slideIn { from { transform: translateX(400px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        .toast.success { border-left: 4px solid var(--success-color); }
+        .toast.error { border-left: 4px solid var(--danger-color); }
+        .toast.warning { border-left: 4px solid var(--warning-color); }
+        .toast-icon { width: 2rem; height: 2rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .toast-icon.success { background: rgba(16, 185, 129, 0.1); color: var(--success-color); }
+        .toast-icon.error { background: rgba(239, 68, 68, 0.1); color: var(--danger-color); }
+        .toast-message { flex: 1; font-size: 0.9375rem; color: var(--text-primary); }
+        .footer { background: var(--card-bg); border-top: 1px solid var(--border-color); margin-top: 3rem; padding: 1rem 2rem; }
+        .footer-content { max-width: 1400px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; font-size: 0.875rem; color: var(--text-secondary); }
+        .empty-state { text-align: center; padding: 4rem 2rem; color: var(--text-secondary); }
+        .empty-state-icon { font-size: 4rem; margin-bottom: 1.5rem; opacity: 0.3; }
+        .empty-state-title { font-size: 1.25rem; font-weight: 600; margin-bottom: 0.75rem; color: var(--text-primary); }
+        .loading-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255, 255, 255, 0.9); display: none; align-items: center; justify-content: center; z-index: 999; }
+        .loading-overlay.active { display: flex; }
+        .loading-spinner { text-align: center; }
+        .spinner { width: 4rem; height: 4rem; border: 4px solid var(--border-color); border-top-color: var(--primary-color); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 1.5rem; }
+        .loading-text { font-size: 1.125rem; font-weight: 500; color: var(--text-primary); }
+        .settings-grid { display: grid; gap: 1.5rem; }
+        .settings-section { background: var(--light-bg); padding: 1.25rem; border-radius: var(--radius-md); }
+        .settings-section-title { font-size: 0.9375rem; font-weight: 600; margin-bottom: 1rem; color: var(--text-primary); }
+        .setting-item { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 0; border-bottom: 1px solid var(--border-color); }
+        .setting-item:last-child { border-bottom: none; }
+        .setting-label { font-size: 0.9375rem; color: var(--text-secondary); }
+        .setting-value { font-weight: 500; color: var(--text-primary); }
+        .api-key-status { display: flex; align-items: center; gap: 0.5rem; }
+        .status-indicator { width: 0.75rem; height: 0.75rem; border-radius: 50%; }
+        .status-indicator.set { background: var(--success-color); }
+        .status-indicator.not-set { background: var(--danger-color); }
+        .history-list { display: grid; gap: 0.75rem; max-height: 400px; overflow-y: auto; }
+        .history-item { padding: 1rem; background: var(--light-bg); border-radius: var(--radius-md); cursor: pointer; transition: all 0.2s; }
+        .history-item:hover { background: var(--primary-color); color: white; }
+        .history-timestamp { font-size: 0.8125rem; color: var(--text-secondary); margin-bottom: 0.375rem; }
+        .history-stats { display: flex; gap: 1rem; font-size: 0.875rem; }
+        .blueprint-section { margin-bottom: 2rem; }
+        .blueprint-section-title { font-size: 1.125rem; font-weight: 600; margin-bottom: 1rem; color: var(--text-primary); }
+        .component-list { display: grid; gap: 1rem; }
+        .component-card { background: white; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1rem; }
+        .component-name { font-weight: 600; color: var(--primary-color); margin-bottom: 0.5rem; }
+        .component-type { display: inline-block; padding: 0.25rem 0.75rem; background: var(--light-bg); border-radius: var(--radius-sm); font-size: 0.75rem; font-weight: 500; margin-bottom: 0.75rem; }
+        /* Acceptance Criteria */
+        .acceptance-criteria { margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border-color); }
+        .ac-header { font-size: 0.875rem; font-weight: 600; color: var(--text-primary); margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.375rem; }
+        .ac-header i { color: var(--success-color); }
+        .ac-list { margin-left: 1.25rem; display: grid; gap: 0.375rem; }
+        .ac-list li { font-size: 0.875rem; color: var(--text-secondary); line-height: 1.5; }
+        /* Test Case Cards */
+        .test-cases-list { display: grid; gap: 1.25rem; }
+        .test-case-card { background: white; border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 1.25rem; transition: box-shadow 0.2s; }
+        .test-case-card:hover { box-shadow: var(--shadow-md); }
+        .test-case-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.875rem; gap: 0.75rem; }
+        .test-case-id-title { display: flex; align-items: center; gap: 0.625rem; flex: 1; min-width: 0; flex-wrap: wrap; }
+        .test-case-id { font-size: 0.75rem; font-weight: 600; background: var(--light-bg); color: var(--text-secondary); padding: 0.25rem 0.625rem; border-radius: var(--radius-sm); white-space: nowrap; }
+        .user-story-label { font-size: 0.75rem; font-weight: 600; color: white; background: var(--primary-color); padding: 0.25rem 0.5rem; border-radius: var(--radius-sm); }
+        .test-case-title { font-weight: 600; color: var(--text-primary); font-size: 0.9375rem; }
+        .test-case-badges { display: flex; gap: 0.5rem; flex-shrink: 0; }
+        .priority-badge { padding: 0.25rem 0.625rem; border-radius: var(--radius-sm); font-size: 0.75rem; font-weight: 700; }
+        .priority-badge.p1 { background: #fee2e2; color: #dc2626; }
+        .priority-badge.p2 { background: #fef3c7; color: #d97706; }
+        .priority-badge.p3 { background: #d1fae5; color: #059669; }
+        .type-badge { padding: 0.25rem 0.625rem; border-radius: var(--radius-sm); font-size: 0.75rem; font-weight: 500; background: #e0e7ff; color: var(--primary-color); }
+        .test-case-scenario { font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 0.75rem; padding: 0.625rem 0.875rem; background: #f8fafc; border-radius: var(--radius-sm); border-left: 3px solid var(--primary-color); line-height: 1.5; }
+        .test-case-related { font-size: 0.8125rem; color: var(--text-secondary); margin-bottom: 0.875rem; }
+        .test-case-related i { color: var(--primary-color); margin-right: 0.25rem; }
+        .tc-preconditions { margin-bottom: 0.875rem; }
+        .tc-sections { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        @media (max-width: 768px) { .tc-sections { grid-template-columns: 1fr; } }
+        .tc-section-title { font-size: 0.8125rem; font-weight: 600; color: var(--text-primary); margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.375rem; }
+        .tc-section-title i { color: var(--primary-color); }
+        .tc-section ol, .tc-section ul { margin-left: 1.25rem; display: grid; gap: 0.3rem; }
+        .tc-section li { font-size: 0.875rem; color: var(--text-secondary); line-height: 1.5; }
+        /* API Specs */
+        .api-specs-list { display: grid; gap: 0.625rem; }
+        .api-spec-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1rem; background: var(--light-bg); border-radius: var(--radius-md); flex-wrap: wrap; }
+        .api-method { padding: 0.25rem 0.625rem; border-radius: var(--radius-sm); font-size: 0.75rem; font-weight: 700; font-family: monospace; white-space: nowrap; }
+        .api-method.method-get { background: #d1fae5; color: #059669; }
+        .api-method.method-post { background: #dbeafe; color: #2563eb; }
+        .api-method.method-put { background: #fef3c7; color: #d97706; }
+        .api-method.method-delete { background: #fee2e2; color: #dc2626; }
+        .api-endpoint { font-family: monospace; font-size: 0.875rem; color: var(--text-primary); font-weight: 500; }
+        .api-desc { font-size: 0.875rem; color: var(--text-secondary); }
+        /* DB Schema */
+        .db-schema-list { display: grid; gap: 1rem; }
+        .db-table-card { border: 1px solid var(--border-color); border-radius: var(--radius-md); overflow: hidden; }
+        .db-table-name { padding: 0.75rem 1rem; background: #f1f5f9; font-weight: 600; font-size: 0.9375rem; display: flex; align-items: center; gap: 0.5rem; border-bottom: 1px solid var(--border-color); }
+        .db-table-name i { color: var(--primary-color); }
+        /* AC TC Badge */
+        .ac-list li { display: flex; justify-content: space-between; align-items: flex-start; gap: 0.5rem; }
+        .ac-text { flex: 1; line-height: 1.5; font-size: 0.875rem; color: var(--text-secondary); }
+        .ac-tc-badge { padding: 0.125rem 0.5rem; background: var(--primary-color); color: white; border-radius: 1rem; font-size: 0.6875rem; font-weight: 600; white-space: nowrap; flex-shrink: 0; margin-top: 0.15rem; }
+        /* Test Cases Grouped by Story */
+        .test-cases-by-story { display: grid; gap: 1rem; }
+        .story-test-case-group { border: 2px solid var(--border-color); border-radius: var(--radius-lg); overflow: hidden; background: #f8fafc; }
+        .story-tc-header { padding: 1rem 1.25rem; background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%); cursor: pointer; display: flex; justify-content: space-between; align-items: center; user-select: none; transition: all 0.2s; border: 2px solid transparent; }
+        .story-tc-header:hover { background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%); border-color: var(--primary-color); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .story-tc-title { display: flex; align-items: center; gap: 0.75rem; font-weight: 600; color: var(--text-primary); }
+        .story-tc-title i { color: var(--primary-color); font-size: 1.125rem; }
+        .story-tc-name { font-weight: 500; color: var(--text-secondary); font-size: 0.9375rem; margin-left: 0.5rem; }
+        .story-tc-stats { display: flex; align-items: center; gap: 0.75rem; }
+        .tc-stat { padding: 0.25rem 0.625rem; border-radius: var(--radius-sm); font-size: 0.75rem; font-weight: 600; }
+        .tc-stat.functional { background: #dbeafe; color: #2563eb; }
+        .tc-stat.negative { background: #fee2e2; color: #dc2626; }
+        .tc-stat.edge { background: #fef3c7; color: #d97706; }
+        .tc-count { font-size: 0.875rem; color: var(--text-secondary); font-weight: 500; }
+        .story-tc-content { padding: 1rem; background: white; }
+        .story-tc-content.collapsed { display: none; }
+        .type-badge.functional { background: #dbeafe; color: #2563eb; }
+        .type-badge.negative { background: #fee2e2; color: #dc2626; }
+        .type-badge.edge-case { background: #fef3c7; color: #d97706; }
+        .framework-label { color: var(--primary-color); font-weight: 600; }
+        /* Collapse Controls */
+        .collapse-controls { display: flex; gap: 0.75rem; margin-bottom: 1.5rem; padding: 1rem; background: var(--light-bg); border-radius: var(--radius-md); border: 1px solid var(--border-color); flex-wrap: wrap; }
+        .action-controls { display: flex; gap: 0.75rem; align-items: center; }
+        .collapse-all-btn, .expand-all-btn { padding: 0.5rem 1rem; border: 1px solid var(--border-color); background: white; color: var(--text-secondary); font-size: 0.875rem; font-weight: 500; cursor: pointer; border-radius: var(--radius-sm); transition: all 0.2s; display: flex; align-items: center; gap: 0.5rem; }
+        .collapse-all-btn:hover, .expand-all-btn:hover { background: var(--primary-color); color: white; border-color: var(--primary-color); transform: translateY(-1px); box-shadow: var(--shadow-md); }
+        .collapse-all-btn i, .expand-all-btn i { font-size: 0.875rem; }
+        /* Radio Button Styles */
+        .radio-group { display: flex; gap: 1.5rem; flex-wrap: wrap; }
+        .radio-label { display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-size: 0.9375rem; color: var(--text-primary); }
+        .radio-label input[type="radio"] { display: none; }
+        .radio-custom { width: 1.25rem; height: 1.25rem; border: 2px solid var(--border-color); border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+        .radio-label input[type="radio"]:checked + .radio-custom { border-color: var(--primary-color); background: var(--primary-color); }
+        .radio-label input[type="radio"]:checked + .radio-custom::after { content: ''; width: 0.5rem; height: 0.5rem; background: white; border-radius: 50%; }
+        .radio-label:hover .radio-custom { border-color: var(--primary-color); }
+        /* Export Section */
+        .export-summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 1rem; margin-bottom: 2rem; padding: 1.5rem; background: var(--light-bg); border-radius: var(--radius-lg); border: 1px solid var(--border-color); }
+        .export-summary-stat { text-align: center; }
+        .export-stat-num { font-size: 2rem; font-weight: 700; color: var(--primary-color); line-height: 1.1; }
+        .export-stat-label { font-size: 0.8125rem; color: var(--text-secondary); margin-top: 0.25rem; }
+        .export-formats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem; }
+        .export-format-card { background: white; border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 1.5rem; display: flex; flex-direction: column; gap: 0.5rem; transition: box-shadow 0.2s, transform 0.2s; }
+        .export-format-card:hover { box-shadow: var(--shadow-lg); transform: translateY(-2px); }
+        .export-format-icon { width: 3.25rem; height: 3.25rem; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin-bottom: 0.25rem; }
+        .export-format-name { font-size: 1.25rem; font-weight: 700; color: var(--text-primary); }
+        .export-format-desc { font-weight: 500; color: var(--text-secondary); font-size: 0.9375rem; }
+        .export-format-detail { font-size: 0.875rem; color: var(--text-secondary); flex: 1; line-height: 1.5; }
+        .export-download-btn { margin-top: 0.75rem !important; }
+        @media (max-width: 768px) { .header-content { padding: 1rem; } .main-nav { display: none; } .main-container { padding: 0 1rem; } .analyze-grid { gap: 1rem; } .card-body { padding: 1rem; } .tabs-header { overflow-x: auto; } .tab-btn { padding: 0.75rem 1rem; white-space: nowrap; } }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <i class="fas fa-brain"></i>
+                <span>MeetingPro AI</span>
+            </div>
+            <nav class="main-nav">
+                <button class="nav-btn active" data-section="analyze">Analyze</button>
+                <button class="nav-btn" data-section="dashboard">Dashboard</button>
+                <button class="nav-btn" data-section="export">Export</button>
+            </nav>
+            <div class="header-actions">
+                <button class="icon-btn api-key-btn" id="apiKeyBtn" title="API Key"><i class="fas fa-key"></i></button>
+                <button class="icon-btn" id="settingsBtn" title="Settings"><i class="fas fa-cog"></i></button>
+                <button class="icon-btn" id="helpBtn" title="Help"><i class="fas fa-question"></i></button>
+                <button class="icon-btn" id="profileBtn" title="Profile"><i class="fas fa-user"></i></button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Analyze Section -->
+        <section class="content-section active" id="analyze-section">
+            <div class="analyze-grid">
+                <!-- Input Panel -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title"><i class="fas fa-file-alt"></i> Meeting Notes Input</h2>
+                        <div class="card-actions">
+                            <button class="quick-action-btn" id="importBtn"><i class="fas fa-upload"></i> Import</button>
+                            <button class="quick-action-btn" id="quickExportBtn"><i class="fas fa-download"></i> Export</button>
+                            <button class="quick-action-btn" id="historyBtn"><i class="fas fa-history"></i> History</button>
+                            <button class="quick-action-btn" id="saveBtn"><i class="fas fa-save"></i> Save</button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label class="form-label">Meeting Template</label>
+                            <select class="form-select" id="templateSelect">
+                                <option value="">Select a template...</option>
+                                <option value="sprint-planning">Sprint Planning</option>
+                                <option value="retrospective">Retrospective</option>
+                                <option value="client-meeting">Client Meeting</option>
+                                <option value="technical-review">Technical Review</option>
+                                <option value="brainstorming">Brainstorming</option>
+                                <option value="requirements-gathering">Requirements Gathering</option>
+                                <option value="stakeholder-meeting">Stakeholder Meeting</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Analysis Mode</label>
+                            <div class="radio-group" id="analysisModeGroup">
+                                <label class="radio-label">
+                                    <input type="radio" name="analysisMode" value="fallback" checked>
+                                    <span class="radio-custom"></span>
+                                    <span class="radio-text">Rule Based</span>
+                                </label>
+                                <label class="radio-label">
+                                    <input type="radio" name="analysisMode" value="ai">
+                                    <span class="radio-custom"></span>
+                                    <span class="radio-text">AI Assistant (recommended best for refined results)</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="editor-container">
+                            <div class="editor-toolbar">
+                                <button class="toolbar-btn" data-command="bold" title="Bold"><i class="fas fa-bold"></i></button>
+                                <button class="toolbar-btn" data-command="italic" title="Italic"><i class="fas fa-italic"></i></button>
+                                <button class="toolbar-btn" data-command="underline" title="Underline"><i class="fas fa-underline"></i></button>
+                                <button class="toolbar-btn" data-command="insertUnorderedList" title="Bullet List"><i class="fas fa-list-ul"></i></button>
+                                <button class="toolbar-btn" data-command="insertOrderedList" title="Numbered List"><i class="fas fa-list-ol"></i></button>
+                                <button class="toolbar-btn" data-command="formatBlock" data-value="blockquote" title="Quote"><i class="fas fa-quote-right"></i></button>
+                                <button class="toolbar-btn" data-command="hiliteColor" data-value="#fef3c7" title="Highlight"><i class="fas fa-highlighter"></i></button>
+                                <button class="toolbar-btn" id="linkBtn" title="Insert Link"><i class="fas fa-link"></i></button>
+                            </div>
+                            <textarea class="editor-textarea" id="meetingNotes" placeholder="Paste your meeting notes here or select a template to get started..."></textarea>
+                            <div class="word-counter">
+                                <span id="wordCount">0</span> words | <span id="charCount">0</span> characters
+                            </div>
+                        </div>
+                        <button class="btn-primary" id="analyzeBtn">
+                            <i class="fas fa-magic"></i>
+                            <span>Analyze Notes</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Results Panel -->
+                <div class="card results-panel">
+                    <div class="card-header">
+                        <h2 class="card-title"><i class="fas fa-chart-bar"></i> Analysis Results</h2>
+                    </div>
+                    <div class="tabs-header">
+                        <button class="tab-btn active" data-tab="user-stories">User Stories</button>
+                        <button class="tab-btn" data-tab="test-cases">Test Cases</button>
+                        <button class="tab-btn" data-tab="blueprint">Blueprint</button>
+                        <button class="tab-btn" data-tab="insights">Insights</button>
+                        <button class="tab-btn" data-tab="feature-tree">Feature Tree</button>
+                    </div>
+                    <div class="card-body">
+                        <div class="tab-content active" data-tab-content="user-stories"><div id="userStoriesContent"></div></div>
+                        <div class="tab-content" data-tab-content="test-cases"><div id="testCasesContent"></div></div>
+                        <div class="tab-content" data-tab-content="blueprint"><div id="blueprintContent"></div></div>
+                        <div class="tab-content" data-tab-content="insights"><div id="insightsContent"></div></div>
+                        <div class="tab-content" data-tab-content="feature-tree"><div id="featureTreeContent"></div></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- Dashboard Section -->
+        <section class="content-section" id="dashboard-section">
+            <div class="card">
+                <div class="card-header"><h2 class="card-title"><i class="fas fa-chart-line"></i> Analytics Dashboard</h2></div>
+                <div class="card-body"><div id="dashboardContent"></div></div>
+            </div>
+        </section>
+
+        <!-- Export Section -->
+        <section class="content-section" id="export-section">
+            <div class="card">
+                <div class="card-header"><h2 class="card-title"><i class="fas fa-download"></i> Export Options</h2></div>
+                <div class="card-body"><div id="exportContent"></div></div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div><span id="statusText">Ready</span></div>
+            <div>Last Analysis: <span id="lastAnalysisTime">Never</span></div>
+            <div>v2.1 - MeetingPro AI</div>
+        </div>
+    </footer>
+
+    <!-- Modals -->
+    <div class="modal-overlay" id="apiKeyModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">API Key Configuration</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Select AI Provider</label>
+                    <select class="form-select" id="apiTypeSelect">
+                        <option value="openai">OpenAI</option>
+                        <option value="gemini">Google Gemini</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" id="apiKeyLabel">Enter your API Key</label>
+                    <input type="password" class="form-select" id="apiKeyInput" placeholder="sk-xxxxxxxxxxxxxxx or AIza...">
+                    <p style="margin-top: 0.75rem; font-size: 0.875rem; color: var(--text-secondary);">
+                        Get your API key: 
+                        <a href="https://platform.openai.com/api-keys" target="_blank" style="color: var(--primary-color);">OpenAI</a> | 
+                        <a href="https://makersuite.google.com/app/apikey" target="_blank" style="color: var(--primary-color);">Google Gemini</a>
+                    </p>
+                    <div id="currentApiKeyDisplay" style="margin-top: 1rem; padding: 0.75rem; background: var(--light-bg); border-radius: var(--radius-md); font-size: 0.875rem;"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary modal-close">Cancel</button>
+                <button class="btn-primary" id="saveApiKeyBtn" style="width: auto; margin-top: 0;">Save Key</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="settingsModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Settings</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="settings-grid">
+                    <div class="settings-section">
+                        <h4 class="settings-section-title">Analysis Options</h4>
+                        <div class="setting-item"><span class="setting-label">AI Model</span><span class="setting-value">LLaMA 3.1 70B</span></div>
+                        <div class="setting-item"><span class="setting-label">Max Tokens</span><span class="setting-value">4000</span></div>
+                        <div class="setting-item"><span class="setting-label">Temperature</span><span class="setting-value">0.7</span></div>
+                    </div>
+                    <div class="settings-section">
+                        <h4 class="settings-section-title">Storage Status</h4>
+                        <div class="setting-item"><span class="setting-label">Saved Analyses</span><span class="setting-value" id="savedAnalysesCount">0/10</span></div>
+                        <div class="setting-item"><span class="setting-label">API Key</span><div class="api-key-status"><span class="status-indicator" id="apiKeyStatusIndicator"></span><span class="setting-value" id="apiKeyStatusText">Not Set</span></div></div>
+                    </div>
+                    <div class="settings-section">
+                        <h4 class="settings-section-title">Advanced</h4>
+                        <div class="setting-item"><span class="setting-label">Clear All Data</span><button class="btn-secondary" id="clearDataBtn" style="padding: 0.375rem 0.75rem; font-size: 0.8125rem;">Clear</button></div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer"><button class="btn-secondary modal-close">Close</button></div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="historyModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Analysis History</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="history-list" id="historyList"></div>
+            </div>
+            <div class="modal-footer"><button class="btn-secondary modal-close">Close</button></div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="helpModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Help & Documentation</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div style="line-height: 1.8;">
+                    <h4 style="margin-bottom: 0.75rem;">Getting Started:</h4>
+                    <ol style="margin-left: 1.5rem; margin-bottom: 1.5rem;">
+                        <li>Paste your meeting notes in the editor</li>
+                        <li>Click "Analyze Notes" button</li>
+                        <li>View results in different tabs</li>
+                        <li>Export or save your analysis</li>
+                    </ol>
+                    <h4 style="margin-bottom: 0.75rem;">Features:</h4>
+                    <ul style="margin-left: 1.5rem; margin-bottom: 1.5rem;">
+                        <li>AI-powered analysis with GROQ</li>
+                        <li>User story extraction</li>
+                        <li>Test case generation</li>
+                        <li>Technical blueprint</li>
+                        <li>Feature tree visualization</li>
+                        <li>Multiple export formats</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="modal-footer"><button class="btn-secondary modal-close">Close</button></div>
+        </div>
+    </div>
+
+    <div class="toast-container" id="toastContainer"></div>
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner">
+            <div class="spinner"></div>
+            <div class="loading-text">Analyzing with AI...</div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
