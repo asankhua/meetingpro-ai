@@ -1060,3 +1060,7 @@ Process multiple meetings:
 **MeetingPro AI** - Transform your meeting notes into actionable insights with AI-powered analysis.
 
 **Built with ❤️ using Vanilla JavaScript, HTML5, and CSS3**
+
+---
+
+© 2026 Ashish Kumar Sankhua. All rights reserved.
