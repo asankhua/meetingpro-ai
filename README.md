@@ -56,7 +56,52 @@ MeetingPro AI is an intelligent meeting analysis platform that automatically con
 
 ---
 
-## 🛠️ Technology Stack
+## � Quick Start
+
+### Step-by-Step Usage Guide
+
+#### 1. Input Your Meeting Notes
+**Option A - Copy & Paste:**
+- Copy your meeting transcript or notes
+- Paste directly into the left-side text editor
+
+**Option B - Upload File:**
+- Click the **"Import"** button in the toolbar
+- Select your meeting transcript file (.txt, .doc, or .docx)
+- File content will automatically load into the editor
+
+#### 2. Select Analysis Mode
+Choose your preferred analysis approach:
+- **"AI Assistant"** (Recommended) - Uses Google Gemini AI for intelligent analysis with comprehensive test coverage
+- **"Rule Based"** - Uses pattern matching without API key (faster but less detailed)
+
+#### 3. Configure API Key (For AI Assistant Mode)
+If using AI Assistant mode for the first time:
+1. Click **"API Key"** button in the header
+2. Select **Google Gemini** as the provider
+3. Enter your Gemini API key
+4. Click **"Save Key"**
+
+#### 4. Analyze Meeting
+- Click the **"Analyze Notes"** button
+- Wait for processing (usually 10-30 seconds)
+- System will automatically generate results
+
+#### 5. Review Generated Results
+Navigate through the tabs on the right panel to verify:
+- **📋 User Stories** - Structured stories with acceptance criteria and story points
+- **🧪 Test Cases** - Comprehensive test scenarios (functional, negative, edge cases)
+- **🏗️ Technical Blueprint** - Architecture, API specs, and database schema
+- **💡 Insights** - Key findings, recommendations, and risk assessment
+- **🌳 Feature Tree** - Visual hierarchy of all identified features
+
+#### 6. Export Results
+- Click **"Export"** button to save results in your preferred format
+- Options: JSON, Markdown, or copy to clipboard
+
+---
+
+## �🛠️ Technology Stack
 
 ### Frontend
 - **HTML5** - Semantic structure and accessibility
