@@ -20,13 +20,17 @@ class MeetingNotesAnalyzer {
     getApiUrl() {
         const apiKeyType = localStorage.getItem('selected_api_type') || 'gemini';
         const { key: apiKey } = this.getApiKey();
+        
+        console.log('getApiUrl called:', { apiKeyType, hasKey: !!apiKey });
+        
         switch (apiKeyType) {
             case 'openai':
                 return 'https://api.openai.com/v1/chat/completions';
             case 'gemini':
-                return `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+                // Gemini 2.5 Flash model endpoint
+                return `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
             default:
-                return `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+                return `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
         }
     }
 
@@ -36,9 +40,9 @@ class MeetingNotesAnalyzer {
             case 'openai':
                 return 'gpt-4';
             case 'gemini':
-                return 'gemini-2.5-flash';
+                return 'gemini-1.5-flash';
             default:
-                return 'gemini-2.5-flash';
+                return 'gemini-1.5-flash';
         }
     }
 
