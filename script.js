@@ -87,9 +87,12 @@ class MeetingNotesAnalyzer {
         // Analysis Mode radio button listener
         document.querySelectorAll('input[name="analysisMode"]').forEach(radio => {
             radio.addEventListener('change', (e) => {
-                if (e.target.value === 'ai' && !GROQ_API_KEY) {
-                    this.showToast('Please configure API key for AI Assistant mode', 'warning');
-                    this.showApiKeyModal();
+                if (e.target.value === 'ai') {
+                    const { key: apiKey } = this.getApiKey();
+                    if (!apiKey) {
+                        this.showToast('Please configure API key for AI Assistant mode', 'warning');
+                        this.showApiKeyModal();
+                    }
                 }
             });
         });
@@ -1222,7 +1225,7 @@ ${notes}`;
         try {
             this.analysisHistory = JSON.parse(localStorage.getItem('meetingPro_history') || '[]');
             this.savedAnalyses = JSON.parse(localStorage.getItem('meetingPro_saved') || '{}');
-            const apiKey = localStorage.getItem('groq_api_key');
+            const { type: apiKeyType, key: apiKey } = this.getApiKey();
             if (apiKey) {
                 this.updateApiKeyDisplay(apiKey);
             }
