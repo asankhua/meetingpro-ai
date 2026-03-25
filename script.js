@@ -27,10 +27,10 @@ class MeetingNotesAnalyzer {
             case 'openai':
                 return 'https://api.openai.com/v1/chat/completions';
             case 'gemini':
-                // Gemini 2.5 Flash model endpoint
-                return `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+                // Gemini 1.5 Flash model endpoint (correct model name format)
+                return `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`;
             default:
-                return `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+                return `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`;
         }
     }
 
