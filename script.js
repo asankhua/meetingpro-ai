@@ -19,13 +19,14 @@ class MeetingNotesAnalyzer {
 
     getApiUrl() {
         const apiKeyType = localStorage.getItem('selected_api_type') || 'gemini';
+        const { key: apiKey } = this.getApiKey();
         switch (apiKeyType) {
             case 'openai':
                 return 'https://api.openai.com/v1/chat/completions';
             case 'gemini':
-                return 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
+                return `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
             default:
-                return 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
+                return `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
         }
     }
 
@@ -257,11 +258,12 @@ class MeetingNotesAnalyzer {
                 
                 // Try AI mode
                 try {
+                    console.log('Starting AI analysis with mode:', analysisMode);
                     analysis = await this.analyzeWithAI(notes);
                     this.showToast(`${apiKeyType.charAt(0).toUpperCase() + apiKeyType.slice(1)} analysis completed!`, 'success');
                 } catch (error) {
-                    console.warn('AI failed, falling back:', error);
-                    this.showToast('AI failed, using fallback analysis', 'warning');
+                    console.error('AI failed with error:', error);
+                    this.showToast(`AI failed: ${error.message}. Using fallback analysis`, 'warning');
                     analysis = this.processMeetingNotes(notes);
                 }
             } else {
