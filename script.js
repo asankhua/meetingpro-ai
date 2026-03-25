@@ -18,30 +18,26 @@ class MeetingNotesAnalyzer {
     }
 
     getApiUrl() {
-        const apiKeyType = localStorage.getItem('selected_api_type') || 'openai';
+        const apiKeyType = localStorage.getItem('selected_api_type') || 'gemini';
         switch (apiKeyType) {
             case 'openai':
                 return 'https://api.openai.com/v1/chat/completions';
             case 'gemini':
-                return 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent';
-            case 'groq':
-                return 'https://api.groq.com/openai/v1/chat/completions';
+                return 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
             default:
-                return 'https://api.openai.com/v1/chat/completions';
+                return 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
         }
     }
 
     getApiModel() {
-        const apiKeyType = localStorage.getItem('selected_api_type') || 'openai';
+        const apiKeyType = localStorage.getItem('selected_api_type') || 'gemini';
         switch (apiKeyType) {
             case 'openai':
                 return 'gpt-4';
             case 'gemini':
-                return 'gemini-pro';
-            case 'groq':
-                return 'llama-3.3-70b-versatile';
+                return 'gemini-2.5-flash';
             default:
-                return 'gpt-4';
+                return 'gemini-2.5-flash';
         }
     }
 
@@ -338,7 +334,7 @@ ${notes}`;
             };
 
         } else {
-            // OpenAI and Groq compatible format
+            // OpenAI compatible format
             prompt = `Analyze meeting notes and return ONLY valid JSON with this structure:
 {
   "userStories": [{"id":"US-001","title":"Title","description":"As a [role], I want [feature], so that [benefit]","userRole":"role","benefit":"benefit","businessObjective":"objective","priority":"High|Medium|Low","storyPoints":5,"effort":"High|Medium|Low","risk":"High|Medium|Low","complexity":"High|Medium|Low","category":"category","epic":"epic name","acceptanceCriteria":["c1"],"dependencies":[],"successMetrics":["m1"],"assumptions":[],"qualityScore":85}],
@@ -1374,7 +1370,6 @@ ${notes}`;
             localStorage.removeItem('selected_api_type');
             localStorage.removeItem('openai_api_key');
             localStorage.removeItem('gemini_api_key');
-            localStorage.removeItem('groq_api_key');
             this.analysisHistory = [];
             this.savedAnalyses = {};
             this.showToast('All data cleared!', 'success');
