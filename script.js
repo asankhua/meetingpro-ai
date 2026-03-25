@@ -1304,7 +1304,7 @@ ${notes}`;
 
     showApiKeyModal() {
         const modal = document.getElementById('apiKeyModal');
-        const currentKey = localStorage.getItem('groq_api_key');
+        const { type: keyType, key: currentKey } = this.getApiKey();
         const display = document.getElementById('currentApiKeyDisplay');
         
         if (currentKey) {
