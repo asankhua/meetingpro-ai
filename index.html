@@ -449,18 +449,25 @@
                 <div class="form-group">
                     <label class="form-label">Select AI Provider</label>
                     <select class="form-select" id="apiTypeSelect">
-                        <option value="gemini">Google Gemini 2.5 Flash</option>
+                        <option value="gemini">Google Gemini</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Select Model</label>
+                    <select class="form-select" id="apiModelSelect">
+                        <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
                     </select>
                 </div>
                 <div class="form-group">
                     <label class="form-label" id="apiKeyLabel">Enter your API Key</label>
-                    <input type="password" class="form-select" id="apiKeyInput" placeholder="sk-xxxxxxxxxxxxxxx or AIza...">
+                    <input type="password" class="form-select" id="apiKeyInput" placeholder="AIza...">
                     <p style="margin-top: 0.75rem; font-size: 0.875rem; color: var(--text-secondary);">
-                        Get your API key: 
-                        <a href="https://platform.openai.com/api-keys" target="_blank" style="color: var(--primary-color);">OpenAI</a> | 
-                        <a href="https://makersuite.google.com/app/apikey" target="_blank" style="color: var(--primary-color);">Google Gemini</a>
+                        Get your API key: <a href="https://makersuite.google.com/app/apikey" target="_blank" style="color: var(--primary-color);">Google Gemini</a>
                     </p>
-                    <div id="currentApiKeyDisplay" style="margin-top: 1rem; padding: 0.75rem; background: var(--light-bg); border-radius: var(--radius-md); font-size: 0.875rem;"></div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Current Key:</label>
+                    <div id="currentApiKeyDisplay" style="padding: 0.75rem; background: var(--light-bg); border-radius: var(--radius-md); font-size: 0.875rem;"></div>
                 </div>
             </div>
             <div class="modal-footer">
