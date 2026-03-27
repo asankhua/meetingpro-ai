@@ -1,10 +1,8 @@
-# MeetingPro AI — Product Case Study
+**MeetingPro AI — Intelligent Meeting Analysis Platform**  
+*Transforming Unstructured Meeting Notes into Actionable User Stories, Test Cases & Technical Blueprints*
 
-> **AI-Powered Meeting Intelligence Platform**  
-> Transforming unstructured conversations into actionable product artifacts  
-> 
-> **Author:** Ashish Kumar Sankhua | Product Manager  
-> **Date:** March 2026 | **Status:** Production Ready
+**Author:** Ashish Kumar Sankhua | Product Manager  
+**Date:** March 2026 | **Status:** Production Ready
 
 ---
 
