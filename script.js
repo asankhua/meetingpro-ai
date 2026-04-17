@@ -465,10 +465,28 @@ ${notes}`;
             };
         }
 
-        const response = await fetch(this.getApiUrl(), requestConfig);
+        let response = await fetch(this.getApiUrl(), requestConfig);
+
+        // If 2.5-flash fails with 403, try 1.5-flash as fallback
+        if (!response.ok && response.status === 403) {
+            const selectedModel = localStorage.getItem('selected_model');
+            if (selectedModel === 'gemini-2.5-flash') {
+                console.log('Gemini 2.5 Flash failed with 403, trying 1.5 Flash fallback...');
+                const { key: apiKey } = this.getApiKey();
+                const fallbackUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+                response = await fetch(fallbackUrl, requestConfig);
+                
+                if (response.ok) {
+                    console.log('Fallback to 1.5 Flash successful');
+                    this.showToast('Using Gemini 1.5 Flash (2.5 Flash not available with your key)', 'warning');
+                }
+            }
+        }
 
         if (!response.ok) {
-            throw new Error(`API Error: ${response.status} ${response.statusText}`);
+            const errorData = await response.json().catch(() => ({}));
+            const errorMsg = errorData.error?.message || `API Error: ${response.status} ${response.statusText}`;
+            throw new Error(errorMsg);
         }
 
         const data = await response.json();
