@@ -19,7 +19,15 @@ class MeetingNotesAnalyzer {
 
     getApiUrl() {
         const apiKeyType = localStorage.getItem('selected_api_type') || 'gemini';
-        const selectedModel = localStorage.getItem('selected_model') || 'gemini-1.5-flash';
+        let selectedModel = localStorage.getItem('selected_model') || 'gemini-1.5-flash-latest';
+        
+        // Ensure model has -latest suffix for Gemini API compatibility
+        if (selectedModel === 'gemini-2.5-flash') {
+            selectedModel = 'gemini-2.5-flash-preview-04-17';
+        } else if (selectedModel === 'gemini-1.5-flash') {
+            selectedModel = 'gemini-1.5-flash-latest';
+        }
+        
         const { key: apiKey } = this.getApiKey();
         
         console.log('getApiUrl called:', { apiKeyType, selectedModel, hasKey: !!apiKey });
@@ -28,7 +36,6 @@ class MeetingNotesAnalyzer {
             case 'openai':
                 return 'https://api.openai.com/v1/chat/completions';
             case 'gemini':
-                // Use selected model or default to gemini-1.5-flash
                 return `https://generativelanguage.googleapis.com/v1beta/models/${selectedModel}:generateContent?key=${apiKey}`;
             default:
                 return `https://generativelanguage.googleapis.com/v1beta/models/${selectedModel}:generateContent?key=${apiKey}`;
@@ -37,7 +44,7 @@ class MeetingNotesAnalyzer {
 
     getApiModel() {
         const apiKeyType = localStorage.getItem('selected_api_type') || 'gemini';
-        const selectedModel = localStorage.getItem('selected_model') || 'gemini-1.5-flash';
+        const selectedModel = localStorage.getItem('selected_model') || 'gemini-1.5-flash-latest';
         switch (apiKeyType) {
             case 'openai':
                 return 'gpt-4';
@@ -50,7 +57,7 @@ class MeetingNotesAnalyzer {
 
     async testApiKey() {
         const { type, key } = this.getApiKey();
-        const selectedModel = localStorage.getItem('selected_model') || 'gemini-1.5-flash';
+        const selectedModel = localStorage.getItem('selected_model') || 'gemini-1.5-flash-latest';
         
         if (!key) {
             console.error('No API key found');
@@ -473,7 +480,7 @@ ${notes}`;
             if (selectedModel === 'gemini-2.5-flash') {
                 console.log('Gemini 2.5 Flash failed with 403, trying 1.5 Flash fallback...');
                 const { key: apiKey } = this.getApiKey();
-                const fallbackUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+                const fallbackUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`;
                 response = await fetch(fallbackUrl, requestConfig);
                 
                 if (response.ok) {
