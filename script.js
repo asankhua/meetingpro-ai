@@ -19,30 +19,115 @@ class MeetingNotesAnalyzer {
 
     getApiUrl() {
         const apiKeyType = localStorage.getItem('selected_api_type') || 'gemini';
+        const selectedModel = localStorage.getItem('selected_model') || 'gemini-1.5-flash';
         const { key: apiKey } = this.getApiKey();
         
-        console.log('getApiUrl called:', { apiKeyType, hasKey: !!apiKey });
+        console.log('getApiUrl called:', { apiKeyType, selectedModel, hasKey: !!apiKey });
         
         switch (apiKeyType) {
             case 'openai':
                 return 'https://api.openai.com/v1/chat/completions';
             case 'gemini':
-                // Gemini 2.5 Flash stable model endpoint
-                return `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+                // Use selected model or default to gemini-1.5-flash
+                return `https://generativelanguage.googleapis.com/v1beta/models/${selectedModel}:generateContent?key=${apiKey}`;
             default:
-                return `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+                return `https://generativelanguage.googleapis.com/v1beta/models/${selectedModel}:generateContent?key=${apiKey}`;
         }
     }
 
     getApiModel() {
         const apiKeyType = localStorage.getItem('selected_api_type') || 'gemini';
+        const selectedModel = localStorage.getItem('selected_model') || 'gemini-1.5-flash';
         switch (apiKeyType) {
             case 'openai':
                 return 'gpt-4';
             case 'gemini':
-                return 'gemini-2.5-flash';
+                return selectedModel;
             default:
-                return 'gemini-2.5-flash';
+                return selectedModel;
+        }
+    }
+
+    async testApiKey() {
+        const { type, key } = this.getApiKey();
+        const selectedModel = localStorage.getItem('selected_model') || 'gemini-1.5-flash';
+        
+        if (!key) {
+            console.error('No API key found');
+            return { success: false, error: 'No API key configured' };
+        }
+
+        console.log(`Testing ${type} API key with model ${selectedModel}...`);
+
+        try {
+            if (type === 'gemini') {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${selectedModel}:generateContent?key=${key}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: 'Say "API key is working!" in one sentence.' }] }]
+                    })
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error?.message || `HTTP ${response.status}`);
+                }
+
+                const data = await response.json();
+                console.log('API Key Test Success:', data);
+                return { success: true, message: 'API key is valid and working!' };
+            }
+            return { success: true, message: 'API key configured' };
+        } catch (error) {
+            console.error('API Key Test Failed:', error);
+            return { success: false, error: error.message };
+        }
+    }
+
+    async testApiKeyFromUI() {
+        const typeSelect = document.getElementById('apiTypeSelect');
+        const modelSelect = document.getElementById('apiModelSelect');
+        const input = document.getElementById('apiKeyInput');
+        const keyValue = input.value.trim();
+        const keyType = typeSelect ? typeSelect.value : 'gemini';
+        const modelValue = modelSelect ? modelSelect.value : 'gemini-1.5-flash';
+        
+        if (!keyValue) {
+            this.showToast('Please enter an API key first', 'warning');
+            return;
+        }
+        
+        this.showToast('Testing API key...', 'info');
+        console.log('Testing API key from UI:', { keyType, modelValue });
+        
+        try {
+            let response;
+            if (keyType === 'gemini') {
+                response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelValue}:generateContent?key=${keyValue}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: 'Say "API key is working!" in one sentence.' }] }]
+                    })
+                });
+            }
+            
+            if (!response.ok) {
+                const errorData = await response.json();
+                const errorMsg = errorData.error?.message || `HTTP ${response.status}`;
+                throw new Error(errorMsg);
+            }
+            
+            const data = await response.json();
+            console.log('API Test Success:', data);
+            
+            const generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text || 'Key is valid!';
+            this.showToast(`✅ Key works! Response: "${generatedText.substring(0, 50)}..."`, 'success');
+            
+        } catch (error) {
+            console.error('API Test Failed:', error);
+            this.showToast(`❌ Key test failed: ${error.message}`, 'error');
         }
     }
 
@@ -82,6 +167,7 @@ class MeetingNotesAnalyzer {
         document.getElementById('helpBtn').addEventListener('click', () => this.showHelpModal());
         document.getElementById('profileBtn').addEventListener('click', () => this.showToast('Profile feature coming soon!', 'info'));
         document.getElementById('saveApiKeyBtn').addEventListener('click', () => this.saveApiKey());
+        document.getElementById('testApiKeyBtn').addEventListener('click', () => this.testApiKeyFromUI());
         document.getElementById('clearDataBtn').addEventListener('click', () => this.clearAllData());
         document.getElementById('linkBtn').addEventListener('click', () => this.insertLink());
         
@@ -1325,14 +1411,26 @@ ${notes}`;
 
     saveApiKey() {
         const typeSelect = document.getElementById('apiTypeSelect');
+        const modelSelect = document.getElementById('apiModelSelect');
         const input = document.getElementById('apiKeyInput');
         const keyValue = input.value.trim();
-        const keyType = typeSelect ? typeSelect.value : 'openai';
+        const keyType = typeSelect ? typeSelect.value : 'gemini';
+        const modelValue = modelSelect ? modelSelect.value : 'gemini-1.5-flash';
+        
+        console.log('saveApiKey called:', { keyType, modelValue, keyLength: keyValue.length });
         
         if (keyValue) {
             localStorage.setItem('selected_api_type', keyType);
             localStorage.setItem(`${keyType}_api_key`, keyValue);
-            this.showToast(`${keyType.charAt(0).toUpperCase() + keyType.slice(1)} API key saved!`, 'success');
+            localStorage.setItem('selected_model', modelValue);
+            
+            console.log('API Key saved to localStorage:', {
+                selected_api_type: localStorage.getItem('selected_api_type'),
+                gemini_api_key_stored: !!localStorage.getItem('gemini_api_key'),
+                selected_model: localStorage.getItem('selected_model')
+            });
+            
+            this.showToast(`${keyType.charAt(0).toUpperCase() + keyType.slice(1)} API key saved! Model: ${modelValue}`, 'success');
             this.closeModals();
             this.updateSettingsPanel();
         } else {
