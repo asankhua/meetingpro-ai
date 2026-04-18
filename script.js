@@ -19,32 +19,37 @@ class MeetingNotesAnalyzer {
 
     getApiUrl() {
         const apiKeyType = localStorage.getItem('selected_api_type') || 'gemini';
-        let selectedModel = localStorage.getItem('selected_model') || 'gemini-1.5-flash-latest';
+        let selectedModel = localStorage.getItem('selected_model') || 'gemini-1.5-flash';
         
-        // Ensure model has -latest suffix for Gemini API compatibility
-        if (selectedModel === 'gemini-2.5-flash') {
-            selectedModel = 'gemini-2.5-flash-preview-04-17';
-        } else if (selectedModel === 'gemini-1.5-flash') {
-            selectedModel = 'gemini-1.5-flash-latest';
-        }
+        // Map UI model names to actual API model names
+        const modelMap = {
+            'gemini-2.5-flash': 'gemini-2.5-flash-preview-04-17',
+            'gemini-1.5-flash': 'gemini-1.5-flash',
+            'gemini-1.5-flash-latest': 'gemini-1.5-flash',
+            'gemini-1.5-pro': 'gemini-1.5-pro',
+            'gemini-1.0-pro': 'gemini-1.0-pro'
+        };
+        
+        // Use mapped model or fallback to the selected one
+        const apiModel = modelMap[selectedModel] || selectedModel;
         
         const { key: apiKey } = this.getApiKey();
         
-        console.log('getApiUrl called:', { apiKeyType, selectedModel, hasKey: !!apiKey });
+        console.log('getApiUrl called:', { apiKeyType, selectedModel, apiModel, hasKey: !!apiKey });
         
         switch (apiKeyType) {
             case 'openai':
                 return 'https://api.openai.com/v1/chat/completions';
             case 'gemini':
-                return `https://generativelanguage.googleapis.com/v1beta/models/${selectedModel}:generateContent?key=${apiKey}`;
+                return `https://generativelanguage.googleapis.com/v1beta/models/${apiModel}:generateContent?key=${apiKey}`;
             default:
-                return `https://generativelanguage.googleapis.com/v1beta/models/${selectedModel}:generateContent?key=${apiKey}`;
+                return `https://generativelanguage.googleapis.com/v1beta/models/${apiModel}:generateContent?key=${apiKey}`;
         }
     }
 
     getApiModel() {
         const apiKeyType = localStorage.getItem('selected_api_type') || 'gemini';
-        const selectedModel = localStorage.getItem('selected_model') || 'gemini-1.5-flash-latest';
+        const selectedModel = localStorage.getItem('selected_model') || 'gemini-1.5-flash';
         switch (apiKeyType) {
             case 'openai':
                 return 'gpt-4';
@@ -57,7 +62,7 @@ class MeetingNotesAnalyzer {
 
     async testApiKey() {
         const { type, key } = this.getApiKey();
-        const selectedModel = localStorage.getItem('selected_model') || 'gemini-1.5-flash-latest';
+        const selectedModel = localStorage.getItem('selected_model') || 'gemini-1.5-flash';
         
         if (!key) {
             console.error('No API key found');
@@ -100,18 +105,25 @@ class MeetingNotesAnalyzer {
         const keyType = typeSelect ? typeSelect.value : 'gemini';
         const modelValue = modelSelect ? modelSelect.value : 'gemini-1.5-flash';
         
+        // Map UI model to API model name
+        const modelMap = {
+            'gemini-2.5-flash': 'gemini-2.5-flash-preview-04-17',
+            'gemini-1.5-flash': 'gemini-1.5-flash'
+        };
+        const apiModel = modelMap[modelValue] || modelValue;
+        
         if (!keyValue) {
             this.showToast('Please enter an API key first', 'warning');
             return;
         }
         
         this.showToast('Testing API key...', 'info');
-        console.log('Testing API key from UI:', { keyType, modelValue });
+        console.log('Testing API key from UI:', { keyType, modelValue, apiModel });
         
         try {
             let response;
             if (keyType === 'gemini') {
-                response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelValue}:generateContent?key=${keyValue}`, {
+                response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${apiModel}:generateContent?key=${keyValue}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -480,7 +492,7 @@ ${notes}`;
             if (selectedModel === 'gemini-2.5-flash') {
                 console.log('Gemini 2.5 Flash failed with 403, trying 1.5 Flash fallback...');
                 const { key: apiKey } = this.getApiKey();
-                const fallbackUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`;
+                const fallbackUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
                 response = await fetch(fallbackUrl, requestConfig);
                 
                 if (response.ok) {
