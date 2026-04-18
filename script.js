@@ -19,17 +19,17 @@ class MeetingNotesAnalyzer {
 
     getApiUrl() {
         const apiKeyType = localStorage.getItem('selected_api_type') || 'gemini';
-        let selectedModel = localStorage.getItem('selected_model') || 'gemini-1.5-flash';
+        let selectedModel = localStorage.getItem('selected_model') || 'gemini-2.5-flash';
         
-        // Map UI model names to actual API model names
-        // Defaulting to gemini-1.5-flash as it's stable and widely available
+        // Map UI model names to actual API model names (per Google AI docs)
         const modelMap = {
+            'gemini-2.5-flash': 'gemini-2.5-flash',
             'gemini-1.5-flash': 'gemini-1.5-flash',
-            'gemini-2.5-flash': 'gemini-1.5-flash'  // Fallback to 1.5 if 2.5 selected
+            'gemini-1.5-pro': 'gemini-1.5-pro'
         };
         
-        // Use mapped model or default to gemini-1.5-flash
-        const apiModel = modelMap[selectedModel] || 'gemini-1.5-flash';
+        // Use mapped model or fallback to the selected one
+        const apiModel = modelMap[selectedModel] || selectedModel;
         
         const { key: apiKey } = this.getApiKey();
         
@@ -47,7 +47,7 @@ class MeetingNotesAnalyzer {
 
     getApiModel() {
         const apiKeyType = localStorage.getItem('selected_api_type') || 'gemini';
-        const selectedModel = localStorage.getItem('selected_model') || 'gemini-1.5-flash';
+        const selectedModel = localStorage.getItem('selected_model') || 'gemini-2.5-flash';
         switch (apiKeyType) {
             case 'openai':
                 return 'gpt-4';
@@ -60,7 +60,7 @@ class MeetingNotesAnalyzer {
 
     async testApiKey() {
         const { type, key } = this.getApiKey();
-        const selectedModel = localStorage.getItem('selected_model') || 'gemini-1.5-flash';
+        const selectedModel = localStorage.getItem('selected_model') || 'gemini-2.5-flash';
         
         if (!key) {
             console.error('No API key found');
@@ -101,14 +101,15 @@ class MeetingNotesAnalyzer {
         const input = document.getElementById('apiKeyInput');
         const keyValue = input.value.trim();
         const keyType = typeSelect ? typeSelect.value : 'gemini';
-        const modelValue = modelSelect ? modelSelect.value : 'gemini-1.5-flash';
+        const modelValue = modelSelect ? modelSelect.value : 'gemini-2.5-flash';
         
-        // Map UI model to API model name - default to stable 1.5 flash
+        // Map UI model to API model name (per Google AI docs)
         const modelMap = {
+            'gemini-2.5-flash': 'gemini-2.5-flash',
             'gemini-1.5-flash': 'gemini-1.5-flash',
-            'gemini-2.5-flash': 'gemini-1.5-flash'  // Fallback
+            'gemini-1.5-pro': 'gemini-1.5-pro'
         };
-        const apiModel = modelMap[modelValue] || 'gemini-1.5-flash';
+        const apiModel = modelMap[modelValue] || modelValue;
         
         if (!keyValue) {
             this.showToast('Please enter an API key first', 'warning');
@@ -482,20 +483,7 @@ ${notes}`;
             };
         }
 
-        let response = await fetch(this.getApiUrl(), requestConfig);
-
-        // If model fails, try gemini-1.5-flash as fallback
-        if (!response.ok && (response.status === 403 || response.status === 404)) {
-            console.log('Model failed, trying gemini-1.5-flash fallback...');
-            const { key: apiKey } = this.getApiKey();
-            const fallbackUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
-            response = await fetch(fallbackUrl, requestConfig);
-            
-            if (response.ok) {
-                console.log('Fallback to 1.5 Flash successful');
-                this.showToast('Using Gemini 1.5 Flash', 'info');
-            }
-        }
+        const response = await fetch(this.getApiUrl(), requestConfig);
 
         if (!response.ok) {
             const errorData = await response.json().catch(() => ({}));
